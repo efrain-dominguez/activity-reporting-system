@@ -33,6 +33,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEntityRepository, EntityRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<ITrackingRequestRepository, TrackingRequestRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>(); 
 
 // CORS
 builder.Services.AddCors(options =>
