@@ -26,14 +26,10 @@ namespace ARS.Application.Validators
                 .Must(BeValidObjectIdOrNull).WithMessage("ParentEntityId must be a valid MongoDB ObjectId or null");
         }
 
-        private bool BeValidObjectIdOrNull(string? parentEntityId)
+        private bool BeValidObjectIdOrNull(string? id)
         {
-            // Null o cadena vacía son válidos (significa que no tiene parent)
-            if (string.IsNullOrWhiteSpace(parentEntityId))
-                return true;
-
             // Si tiene valor, debe ser un ObjectId válido
-            return ObjectId.TryParse(parentEntityId, out _);
+            return ObjectId.TryParse(id, out _);
         }
     }
 }
