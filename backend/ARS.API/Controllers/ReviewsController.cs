@@ -2,7 +2,6 @@
 using ARS.Domain.Entities;
 using ARS.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
 
 namespace ARS.API.Controllers
 {
