@@ -47,6 +47,9 @@ namespace ARS.Domain.Entities
         [BsonElement("extensionGranted")]
         public bool ExtensionGranted { get; set; } = false;
 
+        [BsonElement("extensionGrantedDate")]
+        public DateTime? ExtensionGrantedDate { get; set; }
+
         [BsonElement("newDueDate")]
         public DateTime? NewDueDate { get; set; }
 
