@@ -6,55 +6,55 @@ Sistema de seguimiento y reporte de actividades con arquitectura limpia para ges
 
 
 
-## 🚀 Tecnologías
+# 🚀 Tecnologías
 
 
 
-### Backend
+## Backend
 
-\- \*\*.NET 9\*\* - Framework principal
+- **.NET 9** - Framework principal
 
-\- \*\*MongoDB\*\* - Base de datos NoSQL
+- **MongoDB** - Base de datos NoSQL
 
-\- \*\*Clean Architecture\*\* - Patrón de arquitectura
+- **Clean Architecture** - Patrón de arquitectura
 
-\- \*\*FluentValidation\*\* - Validación de datos
+- **FluentValidation** - Validación de datos
 
-\- \*\*Docker\*\* - Containerización
+- **Docker** - Containerización
 
 
 
 ### Frontend (En desarrollo)
 
-\- \*\*Angular 19\*\* - Framework frontend
+- **Angular 19** - Framework frontend
 
-\- \*\*Tailwind CSS\*\* - Estilos
+- **Tailwind CSS** - Estilos
 
-\- \*\*Microsoft Entra ID\*\* - Autenticación
-
-
-
-\## 📋 Características
+- **Microsoft Entra ID** - Autenticación
 
 
 
-\- ✅ Gestión de usuarios con roles (Admin, PMO, Entity, Directorate, Team)
-
-\- ✅ Creación y seguimiento de solicitudes de reporte
-
-\- ✅ Sistema de notificaciones en tiempo real
-
-\- ✅ Estructura jerárquica de entidades
-
-\- ✅ Workflow de aprobación de actividades
-
-\- ✅ RESTful API con Swagger
-
-\- ✅ Validación robusta de datos
+## 📋 Características
 
 
 
-\## 🏗️ Arquitectura
+- ✅ Gestión de usuarios con roles (Admin, PMO, Entity, Directorate, Team)
+
+- ✅ Creación y seguimiento de solicitudes de reporte
+
+- ✅ Sistema de notificaciones en tiempo real
+
+- ✅ Estructura jerárquica de entidades
+
+- ✅ Workflow de aprobación de actividades
+
+- ✅ RESTful API con Swagger
+
+- ✅ Validación robusta de datos
+
+
+
+## 🏗️ Arquitectura
 
 ```
 
@@ -72,25 +72,25 @@ backend/
 
 
 
-\## 🛠️ Configuración Local
+## 🛠️ Configuración Local
 
 
 
-\### Prerequisitos
+### Prerequisitos
 
-\- .NET 9 SDK
+- .NET 9 SDK
 
-\- Docker Desktop
+- Docker Desktop
 
-\- Visual Studio 2022 o VS Code
-
-
-
-\### Pasos
+- Visual Studio 2022 o VS Code
 
 
 
-1\. \*\*Clonar el repositorio\*\*
+### Pasos
+
+
+
+1. **Clonar el repositorio**
 
 ```bash
 
@@ -102,7 +102,7 @@ cd activity-reporting-system/backend
 
 
 
-2\. \*\*Levantar MongoDB con Docker\*\*
+2. **Levantar MongoDB con Docker**
 
 ```bash
 
@@ -112,7 +112,7 @@ docker-compose up -d
 
 
 
-3\. \*\*Restaurar paquetes NuGet\*\*
+3. **Restaurar paquetes NuGet**
 
 ```bash
 
@@ -122,7 +122,7 @@ dotnet restore
 
 
 
-4\. \*\*Ejecutar la aplicación\*\*
+4. **Ejecutar la aplicación**
 
 ```bash
 
@@ -132,7 +132,7 @@ dotnet run --project ARS.API
 
 
 
-5\. \*\*Acceder a Swagger\*\*
+5. **Acceder a Swagger**
 
 ```
 
@@ -142,7 +142,7 @@ https://localhost:7xxx/swagger
 
 
 
-6\. \*\*Mongo Express (UI para MongoDB)\*\*
+6. **Mongo Express (UI para MongoDB)**
 
 ```
 
@@ -152,61 +152,61 @@ http://localhost:8081
 
 
 
-\## 📊 Modelos de Datos
+## 📊 Modelos de Datos
 
 
 
-\- \*\*User\*\* - Usuarios del sistema con roles
+- **User** - Usuarios del sistema con roles
 
-\- \*\*Entity\*\* - Entidades organizacionales (jerárquicas)
+- **Entity** - Entidades organizacionales (jerárquicas)
 
-\- \*\*TrackingRequest\*\* - Solicitudes de seguimiento
+- **TrackingRequest** - Solicitudes de seguimiento
 
-\- \*\*Notification\*\* - Sistema de notificaciones
+- **Notification** - Sistema de notificaciones
 
-\- \*\*RequestAssignment\*\* - Asignaciones de solicitudes (En desarrollo)
+- **RequestAssignment** - Asignaciones de solicitudes (En desarrollo)
 
-\- \*\*Activity\*\* - Actividades reportadas (En desarrollo)
+- **Activity** - Actividades reportadas (En desarrollo)
 
-\- \*\*Review\*\* - Revisiones y aprobaciones (En desarrollo)
-
-
-
-\## 🔐 Autenticación
+- **Review** - Revisiones y aprobaciones (En desarrollo)
 
 
 
-\- Microsoft Entra ID (En desarrollo)
-
-\- JWT Tokens
-
-\- Role-based authorization
+## 🔐 Autenticación
 
 
 
-\## 👤 Autor
+- Microsoft Entra ID (En desarrollo)
+
+- JWT Tokens
+
+- Role-based authorization
 
 
 
-\*\*Efraín Domínguez Goycochea\*\*
-
-\- GitHub: \[@efrain-dominguez](https://github.com/efrain-dominguez)
-
-\- LinkedIn: \[Tu LinkedIn]
-
-\- Email: efrain.dominguez.goycochea@gmail.com
+## 👤 Autor
 
 
 
-\## 📝 Estado del Proyecto
+**Efraín Domínguez Goycochea**
+
+- GitHub: [@efrain-dominguez](https://github.com/efrain-dominguez)
+
+- LinkedIn: [Tu LinkedIn]
+
+- Email: efrain.dominguez.goycochea@gmail.com
 
 
 
-🚧 \*\*En desarrollo activo\*\* - Backend funcional, Frontend en progreso
+## 📝 Estado del Proyecto
 
 
 
-\---
+🚧 **En desarrollo activo** - Backend funcional, Frontend en progreso
+
+
+
+---
 
 
 
