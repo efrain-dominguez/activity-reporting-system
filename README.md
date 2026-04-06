@@ -192,7 +192,7 @@ http://localhost:8081
 
 - GitHub: [@efrain-dominguez](https://github.com/efrain-dominguez)
 
-- LinkedIn: [Tu LinkedIn]
+- LinkedIn: www.linkedin.com/in/efrain-dominguez-goycochea
 
 - Email: efrain.dominguez.goycochea@gmail.com
 
