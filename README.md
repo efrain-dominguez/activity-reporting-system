@@ -1,4 +1,4 @@
-\# Activity Reporting System
+# Activity Reporting System
 
 
 
@@ -6,11 +6,11 @@ Sistema de seguimiento y reporte de actividades con arquitectura limpia para ges
 
 
 
-\## 🚀 Tecnologías
+## 🚀 Tecnologías
 
 
 
-\### Backend
+### Backend
 
 \- \*\*.NET 9\*\* - Framework principal
 
@@ -24,7 +24,7 @@ Sistema de seguimiento y reporte de actividades con arquitectura limpia para ges
 
 
 
-\### Frontend (En desarrollo)
+### Frontend (En desarrollo)
 
 \- \*\*Angular 19\*\* - Framework frontend
 
