@@ -35,6 +35,8 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<ITrackingRequestRepository, TrackingRequestRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentRepository>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+
 
 // CORS
 builder.Services.AddCors(options =>

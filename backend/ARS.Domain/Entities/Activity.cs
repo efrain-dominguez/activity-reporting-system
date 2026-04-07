@@ -37,6 +37,9 @@ namespace ARS.Domain.Entities
         [BsonElement("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [BsonElement("updatedAt")]
+        public DateTime? UpdatedAt { get; set; }
+
         [BsonElement("submittedAt")]
         public DateTime? SubmittedAt { get; set; }
 
