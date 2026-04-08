@@ -1,9 +1,23 @@
+using ARS.Application.Validators;
 using ARS.Infrastructure.Data;
 using ARS.Infrastructure.Repositories;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Web;
+using Scalar.AspNetCore;
+using ARS.Application.Services;
+using ARS.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Add Azure AD authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
+
+builder.Services.AddAuthorization();
 
 // Add services
 builder.Services.AddControllers()
@@ -13,13 +27,14 @@ builder.Services.AddControllers()
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
+// Add .NET 9 OpenAPI
+builder.Services.AddOpenApi();
+
 // Add FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
-builder.Services.AddValidatorsFromAssemblyContaining<ARS.Application.Validators.CreateUserDtoValidator>();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDtoValidator>();
 
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 // Configure MongoDB
 builder.Services.Configure<MongoDbSettings>(
@@ -38,29 +53,52 @@ builder.Services.AddScoped<IRequestAssignmentRepository, RequestAssignmentReposi
 builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 
 
-// CORS
+//Custom Services
+builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// ========================================
+// CORS (if needed for frontend)
+// ========================================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular", policy =>
-    {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
 });
 
 var app = builder.Build();
 
-// Configure pipeline
+// ========================================
+// MIDDLEWARE PIPELINE
+// ========================================
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // Map OpenAPI endpoint
+    app.MapOpenApi();
+
+    // Use Scalar UI for API documentation
+    app.MapScalarApiReference(options =>
+    {
+        options.WithTitle("Activity Reporting System API");
+        options.WithTheme(ScalarTheme.Purple);
+        options.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+    });
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAngular");
+
+app.UseCors("AllowAll");
+
+// IMPORTANT: Authentication MUST come before Authorization
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

@@ -1,6 +1,8 @@
 ﻿using ARS.Application.DTOs.Reviews;
+using ARS.Application.Services;
 using ARS.Domain.Entities;
 using ARS.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ARS.API.Controllers
@@ -8,14 +10,14 @@ namespace ARS.API.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class ReviewsController : ControllerBase
+    [Authorize]
+    public class ReviewsController : BaseApiController
     {
         private readonly IReviewRepository _reviewRepository;
 
-        // TODO: Obtener del JWT cuando se implemente autenticación
-        private const string TempUserId = "67460f8a1c2d3e4f5a6b7c8d";  // Usa un userId real
-
-        public ReviewsController(IReviewRepository reviewRepository)
+       
+        public ReviewsController(IReviewRepository reviewRepository, IUserRepository userRepository,
+         ICurrentUserService currentUserService) : base(currentUserService, userRepository)
         {
             _reviewRepository = reviewRepository;
         }
@@ -43,11 +45,12 @@ namespace ARS.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Review>> CreateReview([FromBody] CreateReviewDto dto)
         {
+            var userId = await GetCurrentUserIdAsync();
 
             // Verificar si ya existe una review de este usuario para este assignment
             var existingReview = await _reviewRepository.GetByAssignmentIdAndReviewerAsync(
                 dto.AssignmentId,
-                TempUserId
+                userId
             );
 
             if (existingReview != null)
@@ -59,7 +62,7 @@ namespace ARS.API.Controllers
             {
                 AssignmentId = dto.AssignmentId,
                 RequestId = dto.RequestId,
-                ReviewedByUserId = TempUserId,    
+                ReviewedByUserId = userId,    
                 Decision = dto.Decision,
                 Comments = dto.Comments,
                 ReviewedAt = DateTime.UtcNow,
@@ -89,7 +92,8 @@ namespace ARS.API.Controllers
         [HttpGet("my-reviews")]
         public async Task<ActionResult<IEnumerable<Review>>> GetMyReviews()
         {
-            var reviews = await _reviewRepository.GetByReviewerIdAsync(TempUserId);
+            var userId = await GetCurrentUserIdAsync();
+            var reviews = await _reviewRepository.GetByReviewerIdAsync(userId);
             return Ok(reviews);
         }
     }

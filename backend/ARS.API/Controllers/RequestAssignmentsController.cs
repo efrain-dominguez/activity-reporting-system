@@ -1,7 +1,9 @@
 ﻿using ARS.Application.DTOs.RequestAssignments;
+using ARS.Application.Services;
 using ARS.Domain.Entities;
 using ARS.Domain.Enums;
 using ARS.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ARS.API.Controllers
@@ -9,14 +11,14 @@ namespace ARS.API.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    public class RequestAssignmentsController : ControllerBase
+    [Authorize]
+    public class RequestAssignmentsController : BaseApiController
     {
         private readonly IRequestAssignmentRepository _requestAssignmentRepository;
 
-        // TODO: Obtener del JWT cuando implementemos autenticación
-        private const string TempUserId = "69bdb6dbbd55a95504dea1a3";
 
-        public RequestAssignmentsController(IRequestAssignmentRepository requestAssignmentRepository)
+        public RequestAssignmentsController(IRequestAssignmentRepository requestAssignmentRepository, IUserRepository userRepository,
+         ICurrentUserService currentUserService) : base (currentUserService, userRepository)
         {
             _requestAssignmentRepository = requestAssignmentRepository;
         }
@@ -44,12 +46,14 @@ namespace ARS.API.Controllers
         [HttpPost]
         public async Task<ActionResult<RequestAssignment>> CreateAssignment([FromBody] CreateRequestAssignmentDto dto)
         {
+            var AssignedByUserId = await GetCurrentUserIdAsync();
+
             var requestAssignment = new RequestAssignment
             {
                 RequestId = dto.RequestId,
                 AssignedToEntityId = dto.AssignedToEntityId,
                 AssignedToUserId = dto.AssignedToUserId,
-                AssignedByUserId = TempUserId,
+                AssignedByUserId = AssignedByUserId,
                 DelegatedFromUserId = dto.DelegatedFromUserId,
                 Status = AssignmentStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
@@ -128,14 +132,16 @@ namespace ARS.API.Controllers
         [HttpGet("my-assignments")]
         public async Task<ActionResult<IEnumerable<RequestAssignment>>> GetMyAssignments()
         {
-            var requestAssignments = await _requestAssignmentRepository.GetByAssignedToUserIdAsync(TempUserId);
+            var userId = await GetCurrentUserIdAsync();
+            var requestAssignments = await _requestAssignmentRepository.GetByAssignedToUserIdAsync(userId);
             return Ok(requestAssignments);
         }
 
         [HttpGet("my-delegations")]
         public async Task<ActionResult<IEnumerable<RequestAssignment>>> GetMyDelegations()
         {
-            var requestAssignments = await _requestAssignmentRepository.GetByDelegatedFromUserIdAsync(TempUserId);
+            var userId = await GetCurrentUserIdAsync();
+            var requestAssignments = await _requestAssignmentRepository.GetByDelegatedFromUserIdAsync(userId);
             return Ok(requestAssignments);
         }
 

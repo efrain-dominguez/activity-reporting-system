@@ -1,7 +1,9 @@
 ﻿using ARS.Application.DTOs.TrackingRequests;
+using ARS.Application.Services;
 using ARS.Domain.Entities;
 using ARS.Domain.Enums;
 using ARS.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.NetworkInformation;
 
@@ -9,14 +11,14 @@ namespace ARS.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TrackingRequestsController : ControllerBase
+[Authorize]
+public class TrackingRequestsController : BaseApiController
 {
     private readonly ITrackingRequestRepository _trackingRequestRepository;
 
-    // TODO: Reemplazar con userId del JWT token cuando implementemos auth
-    private const string TempPmoUserId = "67460f8a1c2d3e4f5a6b7c8d";  // Usa un PMO user real
 
-    public TrackingRequestsController(ITrackingRequestRepository trackingRequestRepository)
+    public TrackingRequestsController(ITrackingRequestRepository trackingRequestRepository, IUserRepository userRepository,
+         ICurrentUserService currentUserService) : base(currentUserService, userRepository)
     {
         _trackingRequestRepository = trackingRequestRepository;
     }
@@ -49,7 +51,7 @@ public class TrackingRequestsController : ControllerBase
             Title = dto.Title,
             Description = dto.Description,
             GoalType = dto.GoalType,
-            CreatedByUserId = TempPmoUserId,
+            CreatedByUserId = await GetCurrentUserIdAsync(),
             TargetEntityIds = dto.TargetEntityIds,
             StartDate = dto.StartDate,
             DueDate = dto.DueDate,
@@ -127,7 +129,8 @@ public class TrackingRequestsController : ControllerBase
     [HttpGet("my-requests")]
     public async Task<ActionResult<IEnumerable<TrackingRequest>>> GetMyRequests()
     {
-        var trackingRequests = await _trackingRequestRepository.GetByCreatedByUserIdAsync(TempPmoUserId);
+        var userId = await GetCurrentUserIdAsync();
+        var trackingRequests = await _trackingRequestRepository.GetByCreatedByUserIdAsync(userId);
         return Ok(trackingRequests);
     }
 

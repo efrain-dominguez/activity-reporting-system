@@ -1,7 +1,9 @@
 ﻿using ARS.Application.DTOs.Users;
+using ARS.Application.Services;
 using ARS.Domain.Entities;
 using ARS.Domain.Enums;
 using ARS.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ARS.API.Controllers
@@ -9,14 +11,24 @@ namespace ARS.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    [Authorize]
+    public class UsersController : BaseApiController
     {
         private readonly IUserRepository _userRepository;
 
-        public UsersController(IUserRepository userRepository)
+        public UsersController( IUserRepository userRepository, ICurrentUserService currentUserService): base(currentUserService, userRepository)
         {
             _userRepository = userRepository;
         }
+
+
+        [HttpPost("sync-current-user")]
+        public async Task<ActionResult<User>> SyncCurrentUser()
+        {
+            var user = await GetCurrentUserAsync();
+            return Ok(user);
+        }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()

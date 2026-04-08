@@ -1,42 +1,51 @@
 ﻿using ARS.Application.DTOs.Notifications;
+using ARS.Application.Services;
 using ARS.Domain.Entities;
+using ARS.Domain.Enums;
 using ARS.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ARS.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class NotificationsController : ControllerBase  // ← Plural
+[Authorize]
+public class NotificationsController : BaseApiController
 {
     private readonly INotificationRepository _notificationRepository;
 
-    // TODO: Reemplazar con userId del JWT token cuando implementemos auth
-    private const string TempUserId = "69bdb6dbbd55a95504dea1a3";
 
-    public NotificationsController(INotificationRepository notificationRepository)
+    public NotificationsController(
+         INotificationRepository notificationRepository,
+         IUserRepository userRepository,
+         ICurrentUserService currentUserService) : base(currentUserService, userRepository)
     {
         _notificationRepository = notificationRepository;
     }
 
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Notification>>> GetMyNotifications()
     {
-        var notifications = await _notificationRepository.GetByUserIdAsync(TempUserId);
+        var userId = await GetCurrentUserIdAsync();
+        var notifications = await _notificationRepository.GetByUserIdAsync(userId);
         return Ok(notifications);
     }
 
     [HttpGet("unread")]
     public async Task<ActionResult<IEnumerable<Notification>>> GetMyUnreadNotifications()
     {
-        var notifications = await _notificationRepository.GetUnreadByUserIdAsync(TempUserId);
+        var userId = await GetCurrentUserIdAsync();
+        var notifications = await _notificationRepository.GetUnreadByUserIdAsync(userId);
         return Ok(notifications); 
     }
 
     [HttpGet("unread/count")]
     public async Task<ActionResult<int>> GetUnreadCount()
     {
-        var count = await _notificationRepository.GetUnreadCountAsync(TempUserId);
+        var userId = await GetCurrentUserIdAsync();
+        var count = await _notificationRepository.GetUnreadCountAsync(userId);
         return Ok(count);
     }
 
@@ -54,16 +63,21 @@ public class NotificationsController : ControllerBase  // ← Plural
     [HttpPatch("{id}/read")]
     public async Task<ActionResult> MarkAsRead(string id)
     {
+        var userId = await GetCurrentUserIdAsync();
         // Obtener la notificación
         var notification = await _notificationRepository.GetByIdAsync(id);
 
         if (notification == null)
             return NotFound($"Notification with ID {id} not found");
 
+        // Verify notification belongs to current user
+        if (notification.UserId != userId)
+            return Forbid();
+
+
         // Verificar que pertenece al usuario actual
-        if (notification.UserId != TempUserId)
+        if (notification.UserId != userId)
         {
-            //return Forbid();  // 403 Forbidden - no puedes marcar notificaciones de otros
 
             return StatusCode(403, new
             {
@@ -84,7 +98,9 @@ public class NotificationsController : ControllerBase  // ← Plural
     [HttpPatch("read-all")]
     public async Task<ActionResult> MarkAllAsRead()
     {
-        var marked = await _notificationRepository.MarkAllAsReadAsync(TempUserId);
+        var userId = await GetCurrentUserIdAsync();
+
+        var marked = await _notificationRepository.MarkAllAsReadAsync(userId);
 
         if (!marked)
             return NotFound("No unread notifications found");

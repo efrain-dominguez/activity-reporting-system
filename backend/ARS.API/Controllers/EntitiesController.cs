@@ -1,18 +1,21 @@
 ﻿using ARS.Application.DTOs.Entities;
+using ARS.Application.Services;
 using ARS.Domain.Entities;
 using ARS.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ARS.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EntitiesController : ControllerBase
+    [Authorize]
+    public class EntitiesController : BaseApiController
     {
 
         private readonly IEntityRepository _entityRepository;
 
-        public EntitiesController(IEntityRepository entityRepository )
+        public EntitiesController(IEntityRepository entityRepository, ICurrentUserService currentUserService, IUserRepository userRepository) : base(currentUserService, userRepository)
         {
             _entityRepository = entityRepository;
         }
