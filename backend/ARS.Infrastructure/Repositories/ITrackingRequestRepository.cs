@@ -10,7 +10,7 @@ namespace ARS.Infrastructure.Repositories
         Task<IEnumerable<TrackingRequest>> GetByTargetEntityIdAsync(string entityId);
         Task<IEnumerable<TrackingRequest>> GetByStatusAsync(RequestStatus status);
         Task<IEnumerable<TrackingRequest>> GetOverdueRequestsAsync();
-        Task<IEnumerable<TrackingRequest>> GetActiveRequestsAsync();
+        Task<IEnumerable<TrackingRequest>> GetInProgressRequestsAsync();
         Task<bool> MarkAsOverdueAsync(string requestId);
 
         Task<bool> MarkAsCompletedAsync(string requestId);

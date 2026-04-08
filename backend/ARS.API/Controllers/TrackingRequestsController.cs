@@ -26,7 +26,7 @@ public class TrackingRequestsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TrackingRequest>>> GetAllRequests()
     {
-        var trackingRequests = await _trackingRequestRepository.GetActiveRequestsAsync();
+        var trackingRequests = await _trackingRequestRepository.GetAllAsync();
         return Ok(trackingRequests);
     }
 
@@ -85,8 +85,11 @@ public class TrackingRequestsController : ControllerBase
         trackingRequest.Description = dto.Description;
         trackingRequest.GoalType = dto.GoalType;
         trackingRequest.TargetEntityIds = dto.TargetEntityIds;
+        trackingRequest.StartDate = dto.StartDate;
         trackingRequest.DueDate = dto.DueDate;
         trackingRequest.Frequency = dto.Frequency;
+        trackingRequest.IsRecurring = dto.IsRecurring;
+        trackingRequest.Status = dto.Status; 
         trackingRequest.UpdatedAt = DateTime.UtcNow;
 
         var updated = await _trackingRequestRepository.UpdateAsync(id, trackingRequest);
@@ -154,10 +157,10 @@ public class TrackingRequestsController : ControllerBase
         return Ok(trackingRequests);
     }
 
-    [HttpGet("active")]
-    public async Task<ActionResult<IEnumerable<TrackingRequest>>> GetActiveRequests()
+    [HttpGet("in-progress")]
+    public async Task<ActionResult<IEnumerable<TrackingRequest>>> GetInProgressRequests()
     {
-        var trackingRequests = await _trackingRequestRepository.GetActiveRequestsAsync();
+        var trackingRequests = await _trackingRequestRepository.GetInProgressRequestsAsync();
         return Ok(trackingRequests);
     }
 

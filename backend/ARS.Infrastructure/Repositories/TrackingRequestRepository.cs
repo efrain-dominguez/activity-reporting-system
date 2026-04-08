@@ -47,7 +47,7 @@ namespace ARS.Infrastructure.Repositories
             return await _collection.Find(filter).SortBy(n => n.DueDate).ToListAsync();
         }
 
-        public async Task<IEnumerable<TrackingRequest>> GetActiveRequestsAsync()
+        public async Task<IEnumerable<TrackingRequest>> GetInProgressRequestsAsync()
         {
             var excluded = new[] { RequestStatus.Completed, RequestStatus.Overdue };
             var filter = Builders<TrackingRequest>.Filter.Nin(e => e.Status, excluded);

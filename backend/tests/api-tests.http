@@ -115,15 +115,15 @@ Content-Type: {{contentType}}
   "title": "Reporte de Publicaciones Q2 2026",
   "description": "Seguimiento mensual de publicaciones científicas",
   "goalType": "Publicaciones Científicas",
-  "targetEntityIds": ["REEMPLAZA-CON-ID-DE-2.1"],
+  "targetEntityIds": ["69d5a8aec913608aff1ddb57"],
   "startDate": "2026-04-15",
   "dueDate": "2026-06-30",
   "frequency": "Mensual",
   "isRecurring": true
 }
 
-### 3.2 Obtener todas las solicitudes activas
-GET {{baseUrl}}/api/trackingrequests/active
+### 3.2 Obtener todas las solicitudes en proceso
+GET {{baseUrl}}/api/trackingrequests/in-progress
 
 ### 3.3 Obtener mis solicitudes (como PMO)
 GET {{baseUrl}}/api/trackingrequests/my-requests
@@ -141,6 +141,41 @@ Content-Type: {{contentType}}
   "dueDate": "2026-05-01",
   "frequency": null,
   "isRecurring": false
+}
+
+### 3.5 Actualizar tracking request a status Active
+PUT {{baseUrl}}/api/trackingrequests/69d5a9a8c913608aff1ddb59
+Content-Type: {{contentType}}
+
+{
+  "title": "Reporte de Publicaciones Q2 2026",
+  "description": "Seguimiento mensual de publicaciones científicas",
+  "goalType": "Publicaciones Científicas",
+  "targetEntityIds": ["69d5a8aec913608aff1ddb57"],
+  "startDate": "2026-04-15",
+  "dueDate": "2026-06-30",
+  "frequency": "Mensual",
+  "isRecurring": true,
+  "status": "InProgress"
+}
+
+### 3.6 Verificar que ahora tiene status InProgress
+GET {{baseUrl}}/api/trackingrequests/in-progress
+
+### 3.7 🧪 TEST: Status inválido (debe fallar)
+PUT {{baseUrl}}/api/trackingrequests/69d5a9a8c913608aff1ddb59
+Content-Type: {{contentType}}
+
+{
+  "title": "Reporte de Publicaciones Q2 2026",
+  "description": "Seguimiento mensual de publicaciones científicas",
+  "goalType": "Publicaciones Científicas",
+  "targetEntityIds": ["69d5a8aec913608aff1ddb57"],
+  "startDate": "2026-04-15",
+  "dueDate": "2026-06-30",
+  "frequency": "Mensual",
+  "isRecurring": true,
+  "status": "InvalidStatus"
 }
 
 ### ========================================
