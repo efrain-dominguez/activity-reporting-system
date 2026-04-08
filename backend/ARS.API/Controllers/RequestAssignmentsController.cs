@@ -14,7 +14,7 @@ namespace ARS.API.Controllers
         private readonly IRequestAssignmentRepository _requestAssignmentRepository;
 
         // TODO: Obtener del JWT cuando implementemos autenticación
-        private const string TempUserId = "67460f8a1c2d3e4f5a6b7c8d";
+        private const string TempUserId = "69bdb6dbbd55a95504dea1a3";
 
         public RequestAssignmentsController(IRequestAssignmentRepository requestAssignmentRepository)
         {

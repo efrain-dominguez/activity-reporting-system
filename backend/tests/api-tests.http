@@ -4,6 +4,18 @@
 @baseUrl = http://localhost:5270
 @contentType = application/json
 
+
+### Recuperar IDs
+
+### Get all users
+GET {{baseUrl}}/api/users
+
+### Get all entities
+GET {{baseUrl}}/api/entities
+
+### Get all tracking requests
+GET {{baseUrl}}/api/trackingrequests
+
 ### ========================================
 ### 📝 PASO 1: CREAR USUARIOS
 ### ========================================
@@ -189,16 +201,57 @@ POST {{baseUrl}}/api/requestassignments
 Content-Type: {{contentType}}
 
 {
-  "requestId": "REEMPLAZA-CON-ID-DE-3.1",
-  "assignedToEntityId": "REEMPLAZA-CON-ID-DE-2.1",
-  "assignedToUserId": "REEMPLAZA-CON-ID-DE-1.2"
+  "requestId": "69d5a8aec913608aff1ddb57",
+  "assignedToEntityId": "69c6efb364185a00fd8ad691",
+  "assignedToUserId": "69bdb6dbbd55a95504dea1a3"
 }
 
-### 4.2 Ver mis asignaciones
+### 4.2 Get all assignments
+GET {{baseUrl}}/api/requestassignments
+
+### 4.3 Get my assignments (as Team user)
 GET {{baseUrl}}/api/requestassignments/my-assignments
 
-### 4.3 Ver asignaciones pendientes
+### 4.4 Get assignments by entity
+GET {{baseUrl}}/api/requestassignments/entity/69c6efb364185a00fd8ad691
+
+### 4.5 Get assignments by request
+GET {{baseUrl}}/api/requestassignments/request/69d5a8aec913608aff1ddb57
+
+### 4.6 Get pending assignments
 GET {{baseUrl}}/api/requestassignments/pending
+
+### 4.7 Update assignment to InProgress
+PUT {{baseUrl}}/api/requestassignments/69d67f980e22e82b31a5a676
+Content-Type: {{contentType}}
+
+{
+  "status": "InProgress",
+  "noProgressReason": null,
+  "extensionRequested": false
+}
+
+### 4.8 Request extension
+PATCH {{baseUrl}}/api/requestassignments/69d67f980e22e82b31a5a676/request-extension
+
+### 4.9 Get extension requests
+GET {{baseUrl}}/api/requestassignments/extension-requests
+
+### 4.11 Submit assignment
+PATCH {{baseUrl}}/api/requestassignments/69d67f980e22e82b31a5a676/submit
+
+### 4.12 Get submitted assignments
+GET {{baseUrl}}/api/requestassignments/submitted
+
+### 4.13 🧪 TEST: Try to edit submitted assignment (should fail)
+PUT {{baseUrl}}/api/requestassignments/69d67f980e22e82b31a5a676
+Content-Type: {{contentType}}
+
+{
+  "status": "InProgress",
+  "noProgressReason": null,
+  "extensionRequested": false
+}
 
 ### ========================================
 ### ✍️ PASO 5: CREAR ACTIVIDAD
@@ -211,10 +264,10 @@ POST {{baseUrl}}/api/activities
 Content-Type: {{contentType}}
 
 {
-  "assignmentId": "REEMPLAZA-CON-ID-DE-4.1",
-  "requestId": "REEMPLAZA-CON-ID-DE-3.1",
-  "description": "Reunión con investigadores para definir plan de publicaciones del trimestre",
-  "activityDate": "2026-04-20"
+  "assignmentId": "69d67f980e22e82b31a5a676",
+  "requestId": "69d5a8aec913608aff1ddb57",
+  "description": "Met with researchers to define the publication plan for Q2. Identified 3 potential journals and set submission deadlines.",
+  "activityDate": "2026-04-08"
 }
 
 ### 5.2 Ver mis actividades
@@ -223,19 +276,41 @@ GET {{baseUrl}}/api/activities/my-activities
 ### 5.3 Ver actividades editables
 GET {{baseUrl}}/api/activities/editable
 
-### 5.4 Submit actividad (usa ID de 5.1)
-PATCH {{baseUrl}}/api/activities/REEMPLAZA-CON-ID-DE-5.1/submit
+### 5.4 Get activities by assignment
+GET {{baseUrl}}/api/activities/assignment/69d67f980e22e82b31a5a676
 
-### 5.5 🧪 TEST: Intentar editar actividad ya submitted (debe fallar)
-PUT {{baseUrl}}/api/activities/REEMPLAZA-CON-ID-DE-5.1
+
+
+### 5.5 Get activities by request
+GET {{baseUrl}}/api/activities/request/69d5a8aec913608aff1ddb57
+
+### 5.6 Update activity
+PUT {{baseUrl}}/api/activities/69d685e5037caa74063c1ec8
 Content-Type: {{contentType}}
 
 {
-  "assignmentId": "REEMPLAZA-CON-ID-DE-4.1",
-  "requestId": "REEMPLAZA-CON-ID-DE-3.1",
-  "description": "Intentando editar después de submit",
-  "activityDate": "2026-04-21"
+  "assignmentId": "69d67f980e22e82b31a5a676",
+  "requestId": "69d5a8aec913608aff1ddb57",
+  "description": "Met with researchers to define the publication plan for Q2. Identified 3 potential journals (Nature, Science, Cell) and set submission deadlines for May 15th.",
+  "activityDate": "2026-04-08"
 }
+
+### 5.7 Submit actividad (usa ID de 5.1)
+PATCH {{baseUrl}}/api/activities/69d685e5037caa74063c1ec8/submit
+
+### 5.9 🧪 TEST: Intentar editar actividad ya submitted (debe fallar)
+PUT {{baseUrl}}/api/activities/69d685e5037caa74063c1ec8
+Content-Type: {{contentType}}
+
+{
+  "assignmentId": "69d67f980e22e82b31a5a676",
+  "requestId": "69d5a8aec913608aff1ddb57",
+  "description": "Intentando editar después de submit",
+  "activityDate": "2026-04-08"
+}
+
+### 5.9 🧪 TEST: Try to delete submitted activity (should fail)
+DELETE {{baseUrl}}/api/activities/69d685e5037caa74063c1ec8
 
 ### ========================================
 ### ✅ PASO 6: CREAR REVIEW
