@@ -21,14 +21,21 @@ namespace ARS.Application.Validators
             RuleFor(x => x.Description)
                 .MaximumLength(500).WithMessage("Description cannot exceed 500 characters");
 
-            // ← AGREGAR ESTA VALIDACIÓN
+       
             RuleFor(x => x.ParentEntityId)
-                .Must(BeValidObjectIdOrNull).WithMessage("ParentEntityId must be a valid MongoDB ObjectId or null");
+                .Must(id => string.IsNullOrWhiteSpace(id) || BeValidObjectId(id))
+                .WithMessage("ParentEntityId must be a valid MongoDB ObjectId or null")
+                .When(x => x.ParentEntityId != null);
         }
 
         private bool BeValidObjectIdOrNull(string? id)
         {
             // Si tiene valor, debe ser un ObjectId válido
+            return ObjectId.TryParse(id, out _);
+        }
+
+        private bool BeValidObjectId(string id)
+        {
             return ObjectId.TryParse(id, out _);
         }
     }
