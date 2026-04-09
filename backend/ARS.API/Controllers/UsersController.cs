@@ -101,5 +101,28 @@ namespace ARS.API.Controllers
             var createdUser = await _userRepository.CreateAsync(user);
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
+
+
+        #region temp methods for testing purposes, to be removed later
+
+        [HttpGet("test-error")]
+        public ActionResult TestError()
+        {
+            throw new Exception("This is a test exception!");
+        }
+
+        [HttpGet("test-unauthorized")]
+        public ActionResult TestUnauthorized()
+        {
+            throw new UnauthorizedAccessException("You don't have permission!");
+        }
+
+        [HttpGet("test-notfound")]
+        public ActionResult TestNotFound()
+        {
+            throw new KeyNotFoundException("User not found!");
+        }
+
+        #endregion
     }
 }

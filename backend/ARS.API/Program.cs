@@ -104,6 +104,10 @@ try
 
     var app = builder.Build();
 
+    //excepcion handling middleware
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+
     // ========================================
     // MIDDLEWARE PIPELINE
     // ========================================
