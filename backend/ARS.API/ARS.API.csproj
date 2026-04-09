@@ -12,15 +12,16 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.13.20" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ARS.Application\ARS.Application.csproj" />
     <ProjectReference Include="..\ARS.Infrastructure\ARS.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Middleware\" />
   </ItemGroup>
 
   <ItemGroup>
