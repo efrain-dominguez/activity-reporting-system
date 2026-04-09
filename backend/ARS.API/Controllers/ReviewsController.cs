@@ -43,6 +43,7 @@ namespace ARS.API.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin,PMO")]
         public async Task<ActionResult<Review>> CreateReview([FromBody] CreateReviewDto dto)
         {
             var userId = await GetCurrentUserIdAsync();

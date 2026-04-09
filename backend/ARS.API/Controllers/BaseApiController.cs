@@ -23,6 +23,27 @@ namespace ARS.API.Controllers
             UserRepository = userRepository;
         }
 
+        [HttpGet("debug-claims")]
+        public ActionResult GetCurrentClaims()
+        {
+            var claims = User.Claims.Select(c => new
+            {
+                Type = c.Type,
+                Value = c.Value
+            }).ToList();
+
+            return Ok(new
+            {
+                AllClaims = claims,
+                UserId = CurrentUserService.UserId,
+                Email = CurrentUserService.Email,
+                Name = CurrentUserService.Name,
+                FirstName = CurrentUserService.FirstName,
+                LastName = CurrentUserService.LastName,
+                Roles = CurrentUserService.Roles
+            });
+        }
+
         /// <summary>
         /// Gets the current authenticated user's MongoDB ID.
         /// Auto-syncs the user from Azure AD if not exists in database.
@@ -44,7 +65,7 @@ namespace ARS.API.Controllers
 
         /// <summary>
         /// Gets the current authenticated user entity.
-        /// Auto-syncs from Azure AD if not exists in database.
+        /// Auto-syncs from Azure AD if not exists, and updates role if changed.
         /// </summary>
         protected async Task<User> GetCurrentUserAsync()
         {
@@ -55,23 +76,33 @@ namespace ARS.API.Controllers
 
             if (user == null)
             {
+                // User doesn't exist - create new
                 user = await SyncUserFromAzureAdAsync(azureObjectId);
+            }
+            else
+            {
+                // User exists - check if role needs updating
+                var currentRoleFromAzure = DetermineUserRole(CurrentUserService.Roles);
+
+                if (user.Role != currentRoleFromAzure)
+                {
+                    // Role changed in Azure AD - update it
+                    user.Role = currentRoleFromAzure;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    await UserRepository.UpdateAsync(user.Id, user);
+                }
             }
 
             return user;
         }
-
-        /// <summary>
-        /// Syncs a user from Azure AD to MongoDB.
-        /// </summary>
         private async Task<User> SyncUserFromAzureAdAsync(string azureObjectId)
         {
             var user = new User
             {
                 EntraObjectId = azureObjectId,
                 Email = CurrentUserService.Email ?? "unknown@domain.com",
-                FirstName = ExtractFirstName(CurrentUserService.Name ?? "Unknown"),
-                LastName = ExtractLastName(CurrentUserService.Name ?? "User"),
+                FirstName = CurrentUserService.FirstName ?? "Unknown",  
+                LastName = CurrentUserService.LastName ?? "User",       
                 Role = DetermineUserRole(CurrentUserService.Roles),
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
@@ -84,7 +115,7 @@ namespace ARS.API.Controllers
         /// <summary>
         /// Extracts first name from full name.
         /// </summary>
-        private string ExtractFirstName(string fullName)
+        protected string ExtractFirstName(string fullName)  
         {
             var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             return parts.Length > 0 ? parts[0] : "Unknown";
@@ -93,7 +124,7 @@ namespace ARS.API.Controllers
         /// <summary>
         /// Extracts last name from full name.
         /// </summary>
-        private string ExtractLastName(string fullName)
+        protected string ExtractLastName(string fullName)  
         {
             var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             return parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : "User";
@@ -101,16 +132,15 @@ namespace ARS.API.Controllers
 
         /// <summary>
         /// Determines user role from Azure AD roles.
-        /// Maps Azure AD roles to application UserRole enum.
         /// </summary>
-        private UserRole DetermineUserRole(IEnumerable<string> roles)
+        protected UserRole DetermineUserRole(IEnumerable<string> roles)  
         {
             if (roles.Contains("Admin")) return UserRole.Admin;
             if (roles.Contains("PMO")) return UserRole.PMO;
             if (roles.Contains("Entity")) return UserRole.Entity;
             if (roles.Contains("Directorate")) return UserRole.Directorate;
 
-            return UserRole.Team; // Default role
+            return UserRole.Team;
         }
 
         /// <summary>
@@ -132,6 +162,29 @@ namespace ARS.API.Controllers
                 throw new UnauthorizedAccessException($"This action requires {role} role");
 
             return user;
+        }
+
+        /// <summary>
+        /// Checks if current user has any of the specified roles.
+        /// </summary>
+        protected bool HasAnyRole(params UserRole[] roles)
+        {
+            var userRoles = CurrentUserService.Roles.ToList();
+            return roles.Any(role => userRoles.Contains(role.ToString()));
+        }
+
+        /// <summary>
+        /// Ensures current user has one of the required roles.
+        /// </summary>
+        protected async Task EnsureRoleAsync(params UserRole[] requiredRoles)
+        {
+            var user = await GetCurrentUserAsync();
+
+            if (!requiredRoles.Contains(user.Role))
+            {
+                throw new UnauthorizedAccessException(
+                    $"This action requires one of these roles: {string.Join(", ", requiredRoles)}. Your role: {user.Role}");
+            }
         }
     }
 }

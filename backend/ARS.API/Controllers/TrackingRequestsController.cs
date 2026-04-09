@@ -44,6 +44,7 @@ public class TrackingRequestsController : BaseApiController
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,PMO")]
     public async Task<ActionResult<TrackingRequest>> CreateRequest([FromBody] CreateTrackingRequestDto dto)
     {
         var trackingRequest = new TrackingRequest
@@ -67,6 +68,7 @@ public class TrackingRequestsController : BaseApiController
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,PMO")]
     public async Task<ActionResult> UpdateRequest(string id, [FromBody] UpdateTrackingRequestDto dto)
     {
         var trackingRequest = await _trackingRequestRepository.GetByIdAsync(id);
@@ -103,6 +105,7 @@ public class TrackingRequestsController : BaseApiController
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin,PMO")]
     public async Task<ActionResult> DeleteRequest(string id)
     {
         var trackingRequest = await _trackingRequestRepository.GetByIdAsync(id);

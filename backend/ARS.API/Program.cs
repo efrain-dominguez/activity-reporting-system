@@ -1,20 +1,29 @@
+using ARS.Application.Services;
 using ARS.Application.Validators;
 using ARS.Infrastructure.Data;
 using ARS.Infrastructure.Repositories;
+using ARS.Infrastructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 using Scalar.AspNetCore;
-using ARS.Application.Services;
-using ARS.Infrastructure.Services;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 // Add Azure AD authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    .AddMicrosoftIdentityWebApi(options =>
+    {
+        builder.Configuration.Bind("AzureAd", options);
+        options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+    },
+    options =>
+    {
+        builder.Configuration.Bind("AzureAd", options);
+    });
 
 
 builder.Services.AddAuthorization();

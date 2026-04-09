@@ -230,6 +230,7 @@ namespace ARS.API.Controllers
         }
 
         [HttpPatch("{id}/grant-extension")]
+        [Authorize(Roles = "Admin,PMO")]
         public async Task<ActionResult> GrantExtension(string id)
         {
             var requestAssignment = await _requestAssignmentRepository.GetByIdAsync(id);

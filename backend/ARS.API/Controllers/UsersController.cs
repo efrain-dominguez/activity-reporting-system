@@ -29,6 +29,32 @@ namespace ARS.API.Controllers
             return Ok(user);
         }
 
+        [HttpPost("force-sync-current-user")]
+        public async Task<ActionResult<User>> ForceSyncCurrentUser()
+        {
+            var azureObjectId = CurrentUserService.UserId
+                ?? throw new UnauthorizedAccessException("User not authenticated");
+
+            var user = await UserRepository.GetByEntraIdAsync(azureObjectId);
+
+            if (user == null)
+            {
+                user = await GetCurrentUserAsync();
+            }
+            else
+            {
+                user.Email = CurrentUserService.Email ?? user.Email;
+                user.FirstName = CurrentUserService.FirstName ?? user.FirstName;  
+                user.LastName = CurrentUserService.LastName ?? user.LastName;   
+                user.Role = DetermineUserRole(CurrentUserService.Roles);
+                user.UpdatedAt = DateTime.UtcNow;
+
+                await UserRepository.UpdateAsync(user.Id, user);
+            }
+
+            return Ok(user);
+        }
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
@@ -49,6 +75,7 @@ namespace ARS.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,PMO")]
         public async Task<ActionResult<User>> CreateUser([FromBody] CreateUserDto dto)
         {
             // Parse role (validation already ensured it's valid)
