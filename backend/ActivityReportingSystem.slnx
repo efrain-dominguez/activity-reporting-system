@@ -3,4 +3,5 @@
   <Project Path="ARS.Application/ARS.Application.csproj" />
   <Project Path="ARS.Domain/ARS.Domain.csproj" />
   <Project Path="ARS.Infrastructure/ARS.Infrastructure.csproj" />
+  <Project Path="ARS.Tests/ARS.Tests.csproj" />
 </Solution>

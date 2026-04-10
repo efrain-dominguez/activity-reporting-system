@@ -34,5 +34,14 @@ namespace ARS.Infrastructure.Repositories
             var filter = Builders<User>.Filter.Eq(u => u.EntityId, entityId);
             return await _collection.Find(filter).ToListAsync();
         }
+
+        public async Task<IEnumerable<User>> GetActiveUsersAsync()
+        {
+            var filter = Builders<User>.Filter.Eq(u => u.IsActive, true);
+            return await _collection.Find(filter)
+                .SortBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToListAsync();
+        }
     }
 }
