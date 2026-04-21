@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom layer for LineOne utilities */
+@layer utilities {
+  .min-h-100vh {
+    min-height: 100vh;
+  }
+
+  .is-scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  .is-scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+/* CSS Variables */
+:root {
+  --margin-x: 1rem;
+  --main-sidebar-width: 5rem;
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --track-color: #e2e8f0;
+  --range-track-h: 0.5rem;
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --margin-x: 1.5rem;
+  }
+}
+
+.dark {
+  --track-color: #1d283a;
+}
+
+/* LineOne cloak class - hides content until JS initializes */
+.cloak {
+  visibility: hidden;
+}
+
+/* Sidebar toggle functionality */
+body.is-sidebar-open .sidebar {
+  /* Add your sidebar open styles if needed */
+}
+
+/* For mobile: hide sidebar by default, show when open */
+@media (max-width: 1279px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  body.is-sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+}

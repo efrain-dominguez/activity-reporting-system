@@ -1,0 +1,35 @@
+<!-- Right Sidebar -->
+<div id="right-sidebar" class="drawer drawer-right">
+  <div class="drawer-overlay fixed inset-0 z-[150] hidden bg-slate-900/60"></div>
+  <div class="drawer-content fixed right-0 top-0 z-[151] hidden h-full w-full sm:w-80">
+    <div class="right-sidebar-tab-wrapper w-full relative flex h-full flex-col bg-white dark:bg-navy-750">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between py-2 px-4">
+        <p class="flex shrink-0 items-center space-x-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span class="text-xs">{{ currentDate }}</span>
+        </p>
+        <button data-close-drawer class="btn -mr-1 size-6 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="is-scrollbar-hidden overflow-y-auto overscroll-contain pt-1 px-4">
+        <p class="text-xs uppercase text-slate-400 dark:text-navy-300">Quick Actions</p>
+
+        <div class="mt-4 space-y-3">
+          <div class="rounded-lg bg-slate-100 p-3 dark:bg-navy-600">
+            <p class="font-medium text-slate-700 dark:text-navy-100">Activity Reporting</p>
+            <p class="mt-1 text-xs text-slate-400 dark:text-navy-300">Track and manage activities</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

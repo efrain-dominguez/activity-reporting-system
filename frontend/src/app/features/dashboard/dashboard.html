@@ -1,0 +1,142 @@
+<div class="mt-4 grid grid-cols-12 gap-4 px-[var(--margin-x)] transition-all duration-[.25s] sm:mt-5 sm:gap-5 lg:mt-6 lg:gap-6">
+
+  <!-- Welcome Card -->
+  <div class="card col-span-12 lg:col-span-8">
+    <div class="flex items-center justify-between p-4 sm:p-5">
+      <div>
+        <h2 class="text-base font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100 lg:text-xl">
+          Welcome to Activity Reporting System
+        </h2>
+        <p class="mt-2 text-slate-400 dark:text-navy-300" *ngIf="currentUser$ | async as user">
+          Hello, <span class="font-medium text-slate-600 dark:text-navy-100">{{ user.firstName }} {{ user.lastName }}</span>! You're logged in as {{ user.email }}
+        </p>
+      </div>
+      <img class="h-20 w-20" src="assets/lineone/images/illustrations/dashboard-check.svg" alt="welcome" />
+    </div>
+  </div>
+
+  <!-- Quick Actions Card -->
+  <div class="card col-span-12 lg:col-span-4">
+    <div class="p-4 sm:p-5">
+      <h3 class="text-base font-medium text-slate-700 dark:text-navy-100">
+        Quick Actions
+      </h3>
+      <div class="mt-4 space-y-2">
+        <button class="btn w-full bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">
+          New Activity
+        </button>
+        <button class="btn w-full border border-slate-300 font-medium text-slate-700 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">
+          View Reports
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards Row 1 -->
+  <div class="card col-span-12 sm:col-span-6 lg:col-span-3">
+    <div class="flex items-center justify-between p-4">
+      <div>
+        <p class="text-xs+ uppercase text-slate-400 dark:text-navy-300">Total Activities</p>
+        <div class="mt-2 flex items-baseline space-x-1">
+          <p class="text-2xl font-semibold text-slate-700 dark:text-navy-100">0</p>
+        </div>
+      </div>
+      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 dark:bg-accent-light/15">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary dark:text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="card col-span-12 sm:col-span-6 lg:col-span-3">
+    <div class="flex items-center justify-between p-4">
+      <div>
+        <p class="text-xs+ uppercase text-slate-400 dark:text-navy-300">Pending Requests</p>
+        <div class="mt-2 flex items-baseline space-x-1">
+          <p class="text-2xl font-semibold text-slate-700 dark:text-navy-100">0</p>
+        </div>
+      </div>
+      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-warning/10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="card col-span-12 sm:col-span-6 lg:col-span-3">
+    <div class="flex items-center justify-between p-4">
+      <div>
+        <p class="text-xs+ uppercase text-slate-400 dark:text-navy-300">In Progress</p>
+        <div class="mt-2 flex items-baseline space-x-1">
+          <p class="text-2xl font-semibold text-slate-700 dark:text-navy-100">0</p>
+        </div>
+      </div>
+      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-info/10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-info" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="card col-span-12 sm:col-span-6 lg:col-span-3">
+    <div class="flex items-center justify-between p-4">
+      <div>
+        <p class="text-xs+ uppercase text-slate-400 dark:text-navy-300">Completed</p>
+        <div class="mt-2 flex items-baseline space-x-1">
+          <p class="text-2xl font-semibold text-slate-700 dark:text-navy-100">0</p>
+        </div>
+      </div>
+      <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-success/10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activities Table -->
+  <div class="card col-span-12">
+    <div class="flex items-center justify-between p-4 sm:p-5">
+      <h3 class="text-base font-medium text-slate-700 dark:text-navy-100">
+        Recent Activities
+      </h3>
+      <a href="#" class="text-xs+ font-medium text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent">
+        View All
+      </a>
+    </div>
+    <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+            <th class="whitespace-nowrap px-4 py-3 font-semibold uppercase text-slate-800 dark:text-navy-100 lg:px-5">
+              #
+            </th>
+            <th class="whitespace-nowrap px-4 py-3 font-semibold uppercase text-slate-800 dark:text-navy-100 lg:px-5">
+              Activity
+            </th>
+            <th class="whitespace-nowrap px-4 py-3 font-semibold uppercase text-slate-800 dark:text-navy-100 lg:px-5">
+              Status
+            </th>
+            <th class="whitespace-nowrap px-4 py-3 font-semibold uppercase text-slate-800 dark:text-navy-100 lg:px-5">
+              Date
+            </th>
+            <th class="whitespace-nowrap px-4 py-3 font-semibold uppercase text-slate-800 dark:text-navy-100 lg:px-5">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 dark:text-navy-300">
+              No activities yet. Create your first activity to get started!
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,21 @@
+@if (isUserLoggedIn) {
+  <app-main-layout></app-main-layout>
+} @else {
+  <!-- Login Screen -->
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
+      <div class="text-center mb-8">
+        <i class="fas fa-clipboard text-blue-600 text-5xl mb-4"></i>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ title }}</h1>
+        <p class="text-gray-600">Sign in to continue</p>
+      </div>
+
+      <button
+        (click)="login()"
+        class="w-full px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
+        <i class="fab fa-microsoft"></i>
+        Login with Azure AD
+      </button>
+    </div>
+  </div>
+}
