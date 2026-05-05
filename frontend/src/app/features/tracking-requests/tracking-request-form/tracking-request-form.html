@@ -1,0 +1,154 @@
+<div class="space-y-5">
+  <!-- Title -->
+  <label class="block">
+    <span class="font-medium text-slate-600 dark:text-navy-100">Title</span>
+    <span class="text-error">*</span>
+    <input
+      type="text"
+      [(ngModel)]="formData.title"
+      placeholder="Enter request title"
+      class="form-input mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+      [class.border-error]="errors['title']"
+      [class.dark:border-error]="errors['title']">
+    <span *ngIf="errors['title']" class="text-tiny+ text-error">{{ errors['title'] }}</span>
+  </label>
+
+  <!-- Description -->
+  <label class="block">
+    <span class="font-medium text-slate-600 dark:text-navy-100">Description</span>
+    <span class="text-error">*</span>
+    <textarea
+      [(ngModel)]="formData.description"
+      rows="3"
+      placeholder="Describe the purpose and goals of this tracking request..."
+      class="form-textarea mt-1.5 w-full resize-none rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+      [class.border-error]="errors['description']"
+      [class.dark:border-error]="errors['description']"></textarea>
+    <span *ngIf="errors['description']" class="text-tiny+ text-error">{{ errors['description'] }}</span>
+  </label>
+
+<!-- Goal Type -->
+<label class="block">
+  <span class="font-medium text-slate-600 dark:text-navy-100">Goal Type / Category</span>
+  <span class="text-error">*</span>
+  <select
+    [(ngModel)]="formData.goalType"
+    class="form-select mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+    [class.border-error]="errors['goalType']"
+    [class.dark:border-error]="errors['goalType']">
+    <option value="">Select goal type</option>
+    <option *ngFor="let type of suggestedGoalTypes" [value]="type">{{ type }}</option>
+  </select>
+  <span *ngIf="errors['goalType']" class="text-tiny+ text-error">{{ errors['goalType'] }}</span>
+</label>
+
+  <!-- Target Entities - Multi Select -->
+  <div class="block">
+    <span class="font-medium text-slate-600 dark:text-navy-100">Target Entities</span>
+    <span class="text-error">*</span>
+    <select
+      multiple
+      size="6"
+      class="form-multiselect mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+      [class.border-error]="errors['targetEntityIds']"
+      [class.dark:border-error]="errors['targetEntityIds']">
+      <option
+        *ngFor="let entity of entities"
+        [value]="entity.id"
+        [selected]="isEntitySelected(entity.id)"
+        (click)="toggleEntitySelection(entity.id)"
+        class="rounded-md">
+        {{ entity.name }} ({{ entity.code }})
+      </option>
+    </select>
+    <span *ngIf="errors['targetEntityIds']" class="text-tiny+ text-error">{{ errors['targetEntityIds'] }}</span>
+    <span class="text-tiny+ text-slate-400 dark:text-navy-300">
+      Hold Ctrl/Cmd to select multiple. Selected: {{ formData.targetEntityIds.length }}
+    </span>
+  </div>
+
+
+  <!-- Date Range -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <!-- Start Date -->
+    <label class="block">
+      <span class="font-medium text-slate-600 dark:text-navy-100">Start Date</span>
+      <span class="text-error">*</span>
+      <input
+        type="text"
+        appFlatpickr
+        [initialDate]="formData.startDate || undefined"
+        (dateChange)="onStartDateChange($event)"
+        placeholder="Select start date"
+        class="form-input mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+        [class.border-error]="errors['startDate']"
+        [class.dark:border-error]="errors['startDate']"
+        readonly>
+      <span *ngIf="errors['startDate']" class="text-tiny+ text-error">{{ errors['startDate'] }}</span>
+    </label>
+
+    <!-- Due Date -->
+    <label class="block">
+      <span class="font-medium text-slate-600 dark:text-navy-100">Due Date</span>
+      <span class="text-error">*</span>
+      <input
+        type="text"
+        appFlatpickr
+        [initialDate]="formData.dueDate || undefined"
+        (dateChange)="onDueDateChange($event)"
+        placeholder="Select due date"
+        class="form-input mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+        [class.border-error]="errors['dueDate']"
+        [class.dark:border-error]="errors['dueDate']"
+        readonly>
+      <span *ngIf="errors['dueDate']" class="text-tiny+ text-error">{{ errors['dueDate'] }}</span>
+    </label>
+  </div>
+
+
+<!-- Recurring Checkbox -->
+<label class="inline-flex items-center space-x-2">
+  <input
+    type="checkbox"
+    [(ngModel)]="formData.isRecurring"
+    (change)="onRecurringChange()"
+    class="form-checkbox is-basic size-5 rounded border-slate-400/70 checked:border-primary checked:bg-primary hover:border-primary focus:border-primary dark:border-navy-400 dark:checked:border-accent dark:checked:bg-accent dark:hover:border-accent dark:focus:border-accent">
+  <span class="line-clamp-1">This is a recurring request</span>
+</label>
+
+<!-- Frequency (only if recurring) -->
+<div *ngIf="formData.isRecurring">
+  <label class="block">
+    <span class="font-medium text-slate-600 dark:text-navy-100">Frequency</span>
+    <span class="text-error">*</span>
+    <select
+      [(ngModel)]="formData.frequency"
+      class="form-select mt-1.5 w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:hover:border-navy-400 dark:focus:border-accent"
+      [class.border-error]="errors['frequency']"
+      [class.dark:border-error]="errors['frequency']">
+      <option [ngValue]="undefined">Select frequency</option>
+      <option *ngFor="let freq of frequencies" [ngValue]="freq">{{ freq }}</option>
+    </select>
+    <span *ngIf="errors['frequency']" class="text-tiny+ text-error">{{ errors['frequency'] }}</span>
+  </label>
+</div>
+
+  <!-- Form Actions -->
+  <div class="flex justify-end space-x-2 pt-4">
+    <button
+      (click)="onCancel()"
+      type="button"
+      [disabled]="isSubmitting"
+      class="btn min-w-[7rem] border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">
+      Cancel
+    </button>
+    <button
+      (click)="onSubmit()"
+      type="button"
+      [disabled]="isSubmitting"
+      class="btn min-w-[7rem] bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">
+      <span *ngIf="!isSubmitting">{{ request ? 'Update' : 'Create' }} Request</span>
+      <span *ngIf="isSubmitting">Saving...</span>
+    </button>
+  </div>
+</div>

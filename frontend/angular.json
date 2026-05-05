@@ -35,6 +35,9 @@
                 "src/assets/lineone/css/base.css",
                 "src/assets/lineone/css/components.css",
                 "src/assets/lineone/css/pages.css",
+                "node_modules/flatpickr/dist/flatpickr.min.css",
+                "node_modules/tippy.js/dist/tippy.css",
+                "node_modules/tippy.js/animations/scale.css",
                 "src/styles.css"
               ],
               "scripts": [

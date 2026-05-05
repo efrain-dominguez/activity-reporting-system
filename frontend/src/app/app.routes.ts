@@ -28,6 +28,10 @@ export const routes: Routes = [
         canActivate: [authGuard]
       },
       {
+        path: 'tracking-requests/:id/review',  // ADD THIS ROUTE
+        loadComponent: () => import('./features/tracking-requests/review-activities/review-activities').then(m => m.ReviewActivities)
+      },
+      {
         path: 'assignments',
         loadComponent: () => import('./features/assignments/assignments').then(m => m.Assignments),
         canActivate: [authGuard]

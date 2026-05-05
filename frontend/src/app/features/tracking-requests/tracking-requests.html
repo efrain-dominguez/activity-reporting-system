@@ -1,1 +1,368 @@
-<p>tracking-requests works!</p>
+<div class="flex-1 p-4 sm:p-5">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between py-5 lg:py-6">
+    <div>
+      <h2 class="text-xl font-medium text-slate-800 dark:text-navy-50 lg:text-2xl">
+        Tracking Requests
+      </h2>
+      <p class="mt-1 text-xs+ text-slate-400 dark:text-navy-300">
+        Create and manage activity tracking requests
+      </p>
+    </div>
+    <button (click)="onNewRequest()" class="btn space-x-2 bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      <span>New Request</span>
+    </button>
+  </div>
+
+  <!-- Data Table -->
+  <app-data-table
+    [data]="requests"
+    [columns]="columns"
+    [actions]="actions"
+    [config]="tableConfig">
+  </app-data-table>
+</div>
+
+<!-- Cell Templates -->
+<ng-template #titleCell let-row>
+  <div class="flex items-center space-x-2">
+    <div>
+      <div class="font-medium text-slate-700 dark:text-navy-100">
+        {{ row.title }}
+      </div>
+      <div *ngIf="row.description" class="text-xs text-slate-400 line-clamp-1">
+        {{ row.description }}
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #goalTypeCell let-row>
+  <div class="badge rounded-full bg-info/10 text-info dark:bg-info/15">
+    {{ row.goalType }}
+  </div>
+</ng-template>
+
+<ng-template #statusCell let-row>
+  <div class="badge rounded-full" [ngClass]="getRequestStatusClass(row.status)">
+    {{ row.status }}
+  </div>
+</ng-template>
+
+<ng-template #dueDateCell let-row>
+  <div class="flex flex-col">
+    <span class="text-slate-700 dark:text-navy-100">
+      {{ row.dueDate | date: 'MMM d, yyyy' }}
+    </span>
+    <span *ngIf="!isRequestOverdue(row)" class="text-xs text-slate-400">
+      {{ getDaysRemaining(row) }} days left
+    </span>
+    <span *ngIf="isRequestOverdue(row)" class="text-xs font-medium text-error">
+      Overdue by {{ getDaysOverdue(row) }} days
+    </span>
+  </div>
+</ng-template>
+
+<!-- <ng-template #entitiesCell let-row>
+  <div class="flex items-center space-x-1">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+    </svg>
+    <span class="text-slate-700 dark:text-navy-100">{{ row.targetEntityIds.length }}</span>
+  </div>
+</ng-template> -->
+
+<ng-template #activitiesCell let-row>
+  <button
+     *ngIf="getActivityCount(row.id) > 0; else elseBlock"
+    [routerLink]="['/tracking-requests', row.id, 'review']"
+    class="group flex items-center space-x-1.5 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-navy-600">
+
+    <!-- Document Icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-slate-400 group-hover:text-primary dark:text-navy-300 dark:group-hover:text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+
+    <!-- Text -->
+    <span class="text-sm text-slate-700 dark:text-navy-100">
+      <span *ngIf="getPendingReviewCount(row.id) > 0" class="font-medium text-warning">
+        {{ getPendingReviewCount(row.id) }} pending
+      </span>
+      <span *ngIf="getPendingReviewCount(row.id) > 0"> of </span>
+      <span *ngIf="getActivityCount(row.id) > 0">{{ getActivityCount(row.id) }}</span>
+      <!-- <span *ngIf="getActivityCount(row.id) === 0" class="text-slate-400">None</span> -->
+    </span>
+  </button>
+
+   <ng-template #elseBlock>
+      <button disabled class="group flex items-center space-x-1.5 px-2.5 py-1.5">
+
+        <!-- Text -->
+        <span class="text-sm text-slate-700 dark:text-navy-100">
+          <span *ngIf="getActivityCount(row.id) === 0" class="text-slate-400">None</span>
+        </span>
+      </button>
+   </ng-template>
+</ng-template>
+
+
+<!-- <ng-template #createdAtCell let-row>
+  <div class="flex items-center space-x-2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-slate-400 dark:text-navy-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+    <div class="flex flex-col">
+      <span class="text-sm text-slate-700 dark:text-navy-100">
+      {{ row.createdAt | date: 'MMM d, yyyy' }}
+    </span>
+    </div>
+  </div>
+</ng-template> -->
+
+<!-- <ng-template #recurringCell let-row>
+  <div *ngIf="row.isRecurring" class="flex items-center space-x-1">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    </svg>
+    <span class="text-xs+ font-medium text-success">{{ row.frequency }}</span>
+  </div>
+  <span *ngIf="!row.isRecurring" class="text-slate-400">-</span>
+</ng-template> -->
+
+<!-- Create/Edit Modal -->
+<div *ngIf="showCreateModal" class="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden px-4 py-6 sm:px-5" role="dialog">
+  <!-- Backdrop -->
+  <div (click)="closeModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur transition-opacity duration-300"></div>
+
+  <!-- Modal Content -->
+  <div class="relative max-w-3xl w-full origin-bottom rounded-lg bg-white pb-4 transition-all duration-300 dark:bg-navy-700">
+    <!-- Modal Header -->
+    <div class="flex justify-between rounded-t-lg bg-slate-200 px-4 py-3 dark:bg-navy-800 sm:px-5">
+      <h3 class="text-base font-medium text-slate-700 dark:text-navy-100">
+        {{ editingRequest ? 'Edit Tracking Request' : 'Create New Tracking Request' }}
+      </h3>
+      <button
+        (click)="closeModal()"
+        class="btn -mr-1.5 size-7 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25"
+        appTooltip="Close"
+        tooltipPlacement="left">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+      <div class="max-h-[calc(100vh-10rem)] overflow-y-auto px-4 py-4 sm:px-5">
+        <app-tracking-request-form
+          [request]="editingRequest"
+          (save)="onSaveRequest($event)"
+          (cancel)="closeModal()">
+        </app-tracking-request-form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Tracking Request Modal -->
+<div *ngIf="showViewModal && viewingRequest" class="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden px-4 py-6 sm:px-5" role="dialog">
+  <!-- Backdrop -->
+  <div (click)="closeViewModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur transition-opacity duration-300"></div>
+
+  <!-- Modal Content -->
+  <div class="relative max-w-3xl w-full origin-bottom rounded-lg bg-white pb-4 transition-all duration-300 dark:bg-navy-700">
+    <!-- Modal Header -->
+    <div class="flex justify-between rounded-t-lg bg-slate-200 px-4 py-3 dark:bg-navy-800 sm:px-5">
+      <h3 class="text-base font-medium text-slate-700 dark:text-navy-100">
+        View Tracking Request
+      </h3>
+      <button
+        (click)="closeViewModal()"
+        class="btn -mr-1.5 size-7 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25"
+        appTooltip="Close"
+        tooltipPlacement="left">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+      <div class="max-h-[calc(100vh-10rem)] overflow-y-auto px-4 py-4 sm:px-5">
+
+        <!-- Title & Status Row -->
+        <div class="mb-5 flex items-start justify-between">
+          <div class="flex-1">
+            <h4 class="text-lg font-medium text-slate-700 dark:text-navy-100">
+              {{ viewingRequest.title }}
+            </h4>
+            <p class="mt-1 text-xs+ text-slate-400 dark:text-navy-300">
+              ID: {{ viewingRequest.id }}
+            </p>
+          </div>
+          <div class="badge rounded-full" [ngClass]="getRequestStatusClass(viewingRequest.status)">
+            {{ viewingRequest.status }}
+          </div>
+        </div>
+
+          <!-- Details Grid -->
+          <div class="space-y-4">
+
+            <!-- Description -->
+            <div>
+              <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Description</label>
+              <p class="mt-1.5 text-slate-700 dark:text-navy-100">{{ viewingRequest.description }}</p>
+            </div>
+
+            <!-- Goal Type (Full Width) -->
+            <div>
+              <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Goal Type</label>
+              <div class="mt-1.5">
+                <div class="badge rounded-full bg-info/10 text-info dark:bg-info/15">
+                  {{ viewingRequest.goalType }}
+                </div>
+              </div>
+            </div>
+
+           <!-- Target Entities (Full Width with Scrollbar) -->
+          <div>
+            <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">
+              Target Entities
+              <span class="ml-1 text-slate-500">({{ viewingRequest.targetEntityIds.length }})</span>
+            </label>
+            <div class="mt-1.5 max-h-48 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50/50 p-2 dark:border-navy-500 dark:bg-navy-600/50">
+              <div
+                *ngFor="let entity of getEntityDetails(viewingRequest.targetEntityIds)"
+                class="flex items-center space-x-2 rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-navy-500 dark:bg-navy-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-slate-400 dark:text-navy-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <div class="flex-1">
+                  <div class="font-medium text-slate-700 dark:text-navy-100">{{ entity.name }}</div>
+                  <div class="text-xs text-slate-400">{{ entity.code }}</div>
+                </div>
+              </div>
+              <div *ngIf="viewingRequest.targetEntityIds.length === 0" class="px-2 py-4 text-center text-sm text-slate-400">
+                No entities assigned
+              </div>
+            </div>
+          </div>
+
+            <!-- Date Range -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <!-- Start Date -->
+              <div>
+                <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Start Date</label>
+                <p class="mt-1.5 text-slate-700 dark:text-navy-100">
+                  {{ viewingRequest.startDate | date: 'MMM d, yyyy' }}
+                </p>
+              </div>
+
+              <!-- Due Date -->
+              <div>
+                <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Due Date</label>
+                <div class="mt-1.5">
+                  <p class="text-slate-700 dark:text-navy-100">
+                    {{ viewingRequest.dueDate | date: 'MMM d, yyyy' }}
+                  </p>
+                  <p *ngIf="!isRequestOverdue(viewingRequest)" class="text-xs text-slate-400">
+                    {{ getDaysRemaining(viewingRequest) }} days remaining
+                  </p>
+                  <p *ngIf="isRequestOverdue(viewingRequest)" class="text-xs font-medium text-error">
+                    Overdue by {{ getDaysOverdue(viewingRequest) }} days
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recurring Info -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <!-- Recurring -->
+              <div>
+                <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Recurring</label>
+                <div class="mt-1.5">
+                  <span *ngIf="viewingRequest.isRecurring" class="text-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="inline size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Yes
+                  </span>
+                  <span *ngIf="!viewingRequest.isRecurring" class="text-slate-400">No</span>
+                </div>
+              </div>
+
+              <!-- Frequency -->
+              <div *ngIf="viewingRequest.isRecurring">
+                <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Frequency</label>
+                <div class="mt-1.5 flex items-center space-x-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span class="font-medium text-success">{{ viewingRequest.frequency }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="my-4 h-px bg-slate-200 dark:bg-navy-500"></div>
+
+            <!-- Metadata -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <!-- Created -->
+              <div>
+                <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Created</label>
+                <p class="mt-1.5 text-sm text-slate-600 dark:text-navy-200">
+                  {{ viewingRequest.createdAt | date: 'MMM d, yyyy, h:mm a' }}
+                </p>
+              </div>
+
+              <!-- Last Updated -->
+              <div>
+                <label class="block text-xs+ font-medium text-slate-400 dark:text-navy-300">Last Updated</label>
+                <p class="mt-1.5 text-sm text-slate-600 dark:text-navy-200">
+                  {{ viewingRequest.updatedAt | date: 'MMM d, yyyy, h:mm a' }}
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="flex justify-between px-4 pt-4 sm:px-5">
+      <!-- Left side: Review Activities button -->
+      <button 
+        [routerLink]="['/tracking-requests', viewingRequest.id, 'review']"
+        (click)="closeViewModal()"
+        class="btn space-x-2 bg-info font-medium text-white hover:bg-info-focus focus:bg-info-focus active:bg-info-focus/90">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Review Activities</span>
+      </button>
+
+      <!-- Right side: Close and Edit buttons -->
+      <div class="flex space-x-2">
+        <button
+          (click)="closeViewModal()"
+          class="btn min-w-[7rem] border border-slate-300 font-medium text-slate-800 hover:bg-slate-150 focus:bg-slate-150 active:bg-slate-150/80 dark:border-navy-450 dark:text-navy-50 dark:hover:bg-navy-500 dark:focus:bg-navy-500 dark:active:bg-navy-500/90">
+          Close
+        </button>
+        <button
+          *ngIf="viewingRequest.status === RequestStatus.Draft"
+          (click)="closeViewModal(); onEditRequest(viewingRequest)"
+          class="btn min-w-[7rem] bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">
+          Edit
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

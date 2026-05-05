@@ -1,1 +1,93 @@
-<p>activities works!</p>
+<div class="flex-1 p-4 sm:p-5">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between py-5 lg:py-6">
+    <div>
+      <h2 class="text-xl font-medium text-slate-800 dark:text-navy-50 lg:text-2xl">
+        Activities
+      </h2>
+      <p class="mt-1 text-xs+ text-slate-400 dark:text-navy-300">
+        Manage and track all activity reports
+      </p>
+    </div>
+    <button (click)="onNewActivity()" class="btn space-x-2 bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      <span>New Activity</span>
+    </button>
+  </div>
+
+  <!-- Data Table -->
+  <app-data-table
+    [data]="activities"
+    [columns]="columns"
+    [actions]="actions"
+    [config]="tableConfig">
+  </app-data-table>
+</div>
+
+<!-- Cell Templates -->
+<ng-template #assignmentCell let-row>
+  <span class="font-medium text-slate-700 dark:text-navy-100">
+    Assignment {{ row.assignmentId }}
+  </span>
+</ng-template>
+
+<ng-template #requestCell let-row>
+  <span class="text-slate-700 dark:text-navy-100">
+    Request {{ row.requestId }}
+  </span>
+</ng-template>
+
+<ng-template #dateCell let-row>
+  <span class="text-slate-700 dark:text-navy-100">
+    {{ row.activityDate | date: 'MMM d, yyyy' }}
+  </span>
+</ng-template>
+
+<ng-template #statusCell let-row>
+  <div class="badge rounded-full" [ngClass]="getStatusBadgeClass(getActivityStatus(row))">
+    {{ getActivityStatus(row) }}
+  </div>
+</ng-template>
+
+<ng-template #filesCell let-row>
+  <div class="flex items-center space-x-1">
+    <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+    </svg>
+    <span class="text-slate-700 dark:text-navy-100">{{ row.files.length }}</span>
+  </div>
+</ng-template>
+
+<!-- Create/Edit Modal -->
+<div *ngIf="showCreateModal" class="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden px-4 py-6 sm:px-5" role="dialog">
+  <!-- Backdrop -->
+  <div (click)="closeModal()" class="absolute inset-0 bg-slate-900/60 backdrop-blur transition-opacity duration-300"></div>
+
+  <!-- Modal Content -->
+  <div class="relative max-w-2xl w-full origin-bottom rounded-lg bg-white pb-4 transition-all duration-300 dark:bg-navy-700">
+    <!-- Modal Header -->
+    <div class="flex justify-between rounded-t-lg bg-slate-200 px-4 py-3 dark:bg-navy-800 sm:px-5">
+      <h3 class="text-base font-medium text-slate-700 dark:text-navy-100">
+        {{ editingActivity ? 'Edit Activity' : 'Create New Activity' }}
+      </h3>
+      <button (click)="closeModal()" class="btn -mr-1.5 size-7 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+      <div class="max-h-[calc(100vh-10rem)] overflow-y-auto px-4 py-4 sm:px-5">
+        <app-activity-form
+          [activity]="editingActivity"
+          (save)="onSaveActivity($event)"
+          (cancel)="closeModal()">
+        </app-activity-form>
+      </div>
+    </div>
+  </div>
+</div>
