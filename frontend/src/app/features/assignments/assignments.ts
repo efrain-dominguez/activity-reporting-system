@@ -61,6 +61,11 @@ export class Assignments implements OnInit {
   extensionReason = '';
   extensionRequestedDate?: Date;
 
+  // Submit Activity Modal - Form Data
+  activityDate: string = '';
+  activityDescription: string = '';
+  selectedFiles: File[] = [];
+
 
 // Mock current user and entity (replace with auth service)
   currentUserId = 'user1';
@@ -92,6 +97,7 @@ export class Assignments implements OnInit {
     this.stats = this.assignmentsService.getEntityStats(this.currentEntityId);
   }
 
+// Load data for current active tab
   loadTabData(): void {
     switch (this.activeTab) {
       case 'myAssignments':
@@ -108,9 +114,16 @@ export class Assignments implements OnInit {
         break;
     }
 
-    // Force change detection
     this.cdr.detectChanges();
-}
+  }
+
+  loadAllTabData(): void {
+    this.myAssignments = this.assignmentsService.getMyAssignments(this.currentUserId);
+    this.delegatedAssignments = this.assignmentsService.getDelegatedByMe(this.currentUserId);
+    this.entityAssignments = this.assignmentsService.getEntityAssignments(this.currentEntityId);
+    console.log('All tabs data reloaded');
+    this.cdr.detectChanges();
+  }
 
   setActiveTab(tab: 'myAssignments' | 'delegatedByMe' | 'teamOverview'): void {
     this.activeTab = tab;
@@ -153,47 +166,74 @@ export class Assignments implements OnInit {
     setTimeout(() => this.cdr.detectChanges(), 0);
   }
 
-  async submitDelegation(): Promise<void> {
-    if (!this.selectedAssignment || !this.delegateToEntityId) {
-      await this.modalService.alert({
-        title: 'Validation Error',
-        message: 'Please select an entity to delegate to.',
-        variant: 'warning'
-      });
-      return;
-    }
-
-    const confirmed = await this.modalService.confirm({
-      title: 'Delegate Assignment',
-      message: `Are you sure you want to delegate this assignment to ${this.getEntity(this.delegateToEntityId)?.name}?`,
-      confirmText: 'Delegate',
-      cancelText: 'Cancel',
-      variant: 'info'
+async submitDelegation(): Promise<void> {
+  // Validation
+  if (!this.delegateToEntityId) {
+    await this.modalService.alert({
+      title: 'Missing Information',
+      message: 'Please select an entity to delegate to.',
+      variant: 'warning'
     });
-
-    if (confirmed) {
-      this.assignmentsService.delegateAssignment(
-        this.selectedAssignment.id,
-        {
-          assignedToEntityId: this.delegateToEntityId,
-          assignedToUserId: this.delegateToUserId || undefined,
-          notes: this.delegateNotes || undefined
-        },
-        this.currentUserId
-      );
-
-      await this.modalService.alert({
-        title: 'Success',
-        message: 'Assignment delegated successfully!',
-        variant: 'success'
-      });
-
-      this.closeDelegateModal();
-      this.loadStats();
-      this.loadTabData();
-    }
+    return;
   }
 
+  if (!this.selectedAssignment) {
+    return;
+  }
+
+  // Get entity name for confirmation message
+  const entityName = this.getEntity(this.delegateToEntityId)?.name || 'selected entity';
+
+  // Ask for confirmation (modal stays open)
+  const confirmed = await this.modalService.confirm({
+    title: 'Confirm Delegation',
+    message: `Are you sure you want to delegate this assignment to ${entityName}?`,
+    confirmText: 'Delegate',
+    cancelText: 'Cancel',
+    variant: 'info'
+  });
+
+  if (!confirmed) {
+    return; // User cancelled - stay in modal
+  }
+
+  // Perform delegation
+  const newAssignment = this.assignmentsService.delegateAssignment(
+    this.selectedAssignment.id,
+    this.delegateToEntityId,
+    undefined,
+    this.delegateNotes
+  );
+
+  if (!newAssignment) {
+    await this.modalService.alert({
+      title: 'Delegation Failed',
+      message: 'Failed to delegate assignment. Please try again.',
+      variant: 'error'
+    });
+    return;
+  }
+
+  // Close the delegate modal NOW (after confirmation)
+  this.closeDelegateModal();
+
+  // Show success
+  await this.modalService.alert({
+    title: 'Delegation Successful',
+    message: `Assignment has been delegated to ${entityName}.`,
+    variant: 'success'
+  });
+
+  // Reset form
+  this.delegateToEntityId = '';
+  this.delegateNotes = '';
+
+  // Reload all data
+  this.loadStats();
+  this.loadAllTabData();
+
+  this.cdr.detectChanges();
+}
   closeDelegateModal(): void {
     this.showDelegateModal = false;
     this.selectedAssignment = undefined;
@@ -208,40 +248,67 @@ export class Assignments implements OnInit {
     setTimeout(() => this.cdr.detectChanges(), 0);
   }
 
-  async submitNoProgress(): Promise<void> {
-    if (!this.selectedAssignment || !this.noProgressReason.trim()) {
-      await this.modalService.alert({
-        title: 'Validation Error',
-        message: 'Please provide a reason for no progress.',
-        variant: 'warning'
-      });
-      return;
-    }
-
-    const confirmed = await this.modalService.confirm({
-      title: 'Report No Progress',
-      message: 'Are you sure you want to report no progress for this assignment?',
-      confirmText: 'Report',
-      cancelText: 'Cancel',
+async submitNoProgress(): Promise<void> {
+  // Validation
+  if (!this.noProgressReason.trim()) {
+    await this.modalService.alert({
+      title: 'Missing Information',
+      message: 'Please provide a reason for no progress.',
       variant: 'warning'
     });
-
-    if (confirmed) {
-      this.assignmentsService.reportNoProgress(this.selectedAssignment.id, {
-        reason: this.noProgressReason
-      });
-
-      await this.modalService.alert({
-        title: 'Success',
-        message: 'No progress reported successfully!',
-        variant: 'success'
-      });
-
-      this.closeNoProgressModal();
-      this.loadStats();
-      this.loadTabData();
-    }
+    return;
   }
+
+  if (!this.selectedAssignment) {
+    return;
+  }
+
+  // Confirm this serious action (modal stays open)
+  const confirmed = await this.modalService.confirm({
+    title: 'Confirm No Progress Report',
+    message: 'This will notify the PMO that no progress can be made and mark the assignment accordingly. Are you sure?',
+    confirmText: 'Report No Progress',
+    cancelText: 'Cancel',
+    variant: 'warning'
+  });
+
+  if (!confirmed) {
+    return; // User cancelled - stay in modal
+  }
+
+  // Submit no progress report
+  const success = this.assignmentsService.reportNoProgress(
+    this.selectedAssignment.id,
+    this.noProgressReason
+  );
+
+  if (!success) {
+    await this.modalService.alert({
+      title: 'Report Failed',
+      message: 'Failed to submit no progress report. Please try again.',
+      variant: 'error'
+    });
+    return;
+  }
+
+  // Close the no progress modal NOW (after confirmation)
+  this.closeNoProgressModal();
+
+  await this.modalService.alert({
+    title: 'Report Submitted',
+    message: 'No progress report has been submitted to PMO.',
+    variant: 'success'
+  });
+
+  // Reset form
+  this.noProgressReason = '';
+
+  // Reload all data
+  this.loadStats();
+  this.loadAllTabData();
+
+  this.cdr.detectChanges();
+}
 
   closeNoProgressModal(): void {
     this.showNoProgressModal = false;
@@ -258,41 +325,82 @@ export class Assignments implements OnInit {
     setTimeout(() => this.cdr.detectChanges(), 0);
   }
 
+
   async submitExtensionRequest(): Promise<void> {
-    if (!this.selectedAssignment || !this.extensionReason.trim() || !this.extensionRequestedDate) {
-      await this.modalService.alert({
-        title: 'Validation Error',
-        message: 'Please provide a reason and new due date for the extension.',
-        variant: 'warning'
-      });
-      return;
-    }
-
-    const confirmed = await this.modalService.confirm({
-      title: 'Request Extension',
-      message: 'Are you sure you want to request a deadline extension?',
-      confirmText: 'Request',
-      cancelText: 'Cancel',
-      variant: 'info'
+  // Validation
+  if (!this.extensionRequestedDate || !this.extensionReason.trim()) {
+    await this.modalService.alert({
+      title: 'Missing Information',
+      message: 'Please provide both a new due date and a reason for the extension.',
+      variant: 'warning'
     });
-
-    if (confirmed) {
-      this.assignmentsService.requestExtension(this.selectedAssignment.id, {
-        reason: this.extensionReason,
-        requestedDueDate: this.extensionRequestedDate
-      });
-
-      await this.modalService.alert({
-        title: 'Success',
-        message: 'Extension request submitted successfully!',
-        variant: 'success'
-      });
-
-      this.closeExtensionModal();
-      this.loadStats();
-      this.loadTabData();
-    }
+    return;
   }
+
+  if (!this.selectedAssignment) {
+    return;
+  }
+
+  // Validate new date is after current due date
+  const currentDueDate = this.getTrackingRequest(this.selectedAssignment.requestId)?.dueDate;
+  if (currentDueDate && new Date(this.extensionRequestedDate) <= new Date(currentDueDate)) {
+    await this.modalService.alert({
+      title: 'Invalid Date',
+      message: 'The new due date must be after the current due date.',
+      variant: 'warning'
+    });
+    return;
+  }
+
+  // Confirm action (modal stays open)
+  const confirmed = await this.modalService.confirm({
+    title: 'Request Extension',
+    message: 'This extension request will be sent to PMO for approval. Continue?',
+    confirmText: 'Submit Request',
+    cancelText: 'Cancel',
+    variant: 'info'
+  });
+
+  if (!confirmed) {
+    return; // User cancelled - stay in modal
+  }
+
+  // Submit extension request
+  const success = this.assignmentsService.requestExtension(
+    this.selectedAssignment.id,
+    String(this.extensionRequestedDate),
+    this.extensionReason
+  );
+
+  if (!success) {
+    await this.modalService.alert({
+      title: 'Request Failed',
+      message: 'Failed to submit extension request. Please try again.',
+      variant: 'error'
+    });
+    return;
+  }
+
+  // Close the extension modal NOW (after confirmation)
+  this.closeExtensionModal();
+
+  await this.modalService.alert({
+    title: 'Request Submitted',
+    message: 'Extension request has been submitted for PMO approval.',
+    variant: 'success'
+  });
+
+  // Reset form
+  this.extensionRequestedDate = undefined;
+  this.extensionReason = '';
+
+  // Reload all data
+  this.loadStats();
+  this.loadAllTabData();
+
+  this.cdr.detectChanges();
+}
+
 
   closeExtensionModal(): void {
     this.showExtensionModal = false;
@@ -399,5 +507,91 @@ export class Assignments implements OnInit {
 
   downloadFile(file: { fileName: string; blobUrl: string }): void {
     window.open(file.blobUrl, '_blank');
+  }
+
+
+  onFileSelected(event: any): void {
+    const files: FileList = event.target.files;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      // Check file size (4MB max)
+      if (file.size > 4 * 1024 * 1024) {
+        this.modalService.alert({
+          title: 'File Too Large',
+          message: `${file.name} exceeds the maximum size of 4MB.`,
+          variant: 'error'
+        });
+        continue;
+      }
+
+      this.selectedFiles.push(file);
+    }
+
+    event.target.value = '';
+  }
+
+  // Remove a selected file
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  async submitActivity(): Promise<void> {
+    // Validation
+    if (!this.selectedAssignment || !this.activityDate || !this.activityDescription.trim()) {
+      await this.modalService.alert({
+        title: 'Missing Information',
+        message: 'Please fill in all required fields.',
+        variant: 'warning'
+      });
+      return;
+    }
+
+    // Create new activity object
+    const newActivity: Activity = {
+      id: 'act' + Date.now(),
+      requestId: this.selectedAssignment.requestId,
+      assignmentId: this.selectedAssignment.id,
+      activityDate: new Date(this.activityDate),
+      description: this.activityDescription.trim(),
+      submittedByUserId: this.currentUserId,
+      submittedAt: new Date(),
+      files: this.selectedFiles.map(file => ({
+        fileName: file.name,
+        blobUrl: URL.createObjectURL(file),
+        fileSizeBytes: file.size,
+        fileType: file.type,
+        uploadedAt: new Date(),
+        fileId: 'file' + Date.now() + Math.random().toString(16).slice(2) // Mock file ID
+      })),
+      isEditable: false,
+      review: undefined,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // Save activity through service
+    this.activitiesService.addActivity(newActivity);
+
+    // Show success message
+    await this.modalService.alert({
+      title: 'Success',
+      message: 'Activity submitted successfully!',
+      variant: 'success'
+    });
+
+    // Reset form
+    this.activityDate = '';
+    this.activityDescription = '';
+    this.selectedFiles = [];
+
+    // Close modal
+    this.closeSubmitActivityModal();
+
+    // Reload tab data
+    this.loadAllTabData();
+
+    this.cdr.detectChanges();
   }
 }

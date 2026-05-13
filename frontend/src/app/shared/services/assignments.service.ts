@@ -111,32 +111,7 @@ export class AssignmentsService {
     return newAssignment;
   }
 
-  // Delegate assignment (creates new assignment)
-  delegateAssignment(assignmentId: string, dto: DelegateAssignmentDto, delegatedByUserId: string): RequestAssignment | undefined {
-    const originalAssignment = this.getAssignmentById(assignmentId);
-    if (!originalAssignment) return undefined;
 
-    // Mark original as delegated
-    originalAssignment.status = AssignmentStatus.Delegated;
-    originalAssignment.updatedAt = new Date();
-
-    // Create new assignment
-    const newAssignment: RequestAssignment = {
-      id: `assign${this.mockAssignments.length + 1}`,
-      requestId: originalAssignment.requestId,
-      assignedToEntityId: dto.assignedToEntityId,
-      assignedToUserId: dto.assignedToUserId,
-      assignedByUserId: delegatedByUserId,
-      delegatedFromUserId: delegatedByUserId,
-      status: AssignmentStatus.Pending,
-      extensionRequested: false,
-      extensionGranted: false,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.mockAssignments.push(newAssignment);
-    return newAssignment;
-  }
 
   // Update assignment status
   updateAssignmentStatus(assignmentId: string, status: AssignmentStatus): RequestAssignment | undefined {
@@ -154,30 +129,6 @@ export class AssignmentsService {
     return undefined;
   }
 
-  // Request extension
-  requestExtension(assignmentId: string, dto: RequestExtensionDto): RequestAssignment | undefined {
-    const assignment = this.getAssignmentById(assignmentId);
-    if (assignment) {
-      assignment.extensionRequested = true;
-      assignment.extensionRequestedDate = new Date();
-      assignment.newDueDate = dto.requestedDueDate;
-      assignment.updatedAt = new Date();
-      return assignment;
-    }
-    return undefined;
-  }
-
-  // Report no progress
-  reportNoProgress(assignmentId: string, dto: ReportNoProgressDto): RequestAssignment | undefined {
-    const assignment = this.getAssignmentById(assignmentId);
-    if (assignment) {
-      assignment.status = AssignmentStatus.NoProgress;
-      assignment.noProgressReason = dto.reason;
-      assignment.updatedAt = new Date();
-      return assignment;
-    }
-    return undefined;
-  }
 
   // Get assignment statistics for entity
   getEntityStats(entityId: string): {
@@ -198,4 +149,90 @@ export class AssignmentsService {
       delegated: assignments.filter(a => a.status === AssignmentStatus.Delegated).length
     };
   }
+
+  // Delegate an assignment to another entity
+delegateAssignment(assignmentId: string, toEntityId: string, toUserId?: string, notes?: string): RequestAssignment | null {
+  const originalAssignment = this.mockAssignments.find(a => a.id === assignmentId);
+
+  if (!originalAssignment) {
+    return null;
+  }
+
+  // Mark original assignment as delegated
+  originalAssignment.status = AssignmentStatus.Delegated;
+  originalAssignment.updatedAt = new Date();
+
+  // Create new assignment for the delegated entity/user
+  const newAssignment: RequestAssignment = {
+    id: 'assign' + (this.mockAssignments.length + 1),
+    requestId: originalAssignment.requestId,
+    assignedToEntityId: toEntityId,
+    assignedToUserId: toUserId,
+    assignedByUserId: originalAssignment.assignedToUserId || originalAssignment.assignedByUserId,
+    delegatedFromUserId: originalAssignment.assignedToUserId || 'system',
+    status: AssignmentStatus.Pending,
+    noProgressReason: undefined,
+    extensionRequested: false,
+    extensionRequestedDate: undefined,
+    extensionGranted: false,
+    extensionGrantedDate: undefined,
+    newDueDate: undefined,
+    submittedAt: undefined,
+    reviewedAt: undefined,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+
+  this.mockAssignments.push(newAssignment);
+
+  console.log('Delegation created:', {
+    original: originalAssignment,
+    new: newAssignment,
+    notes: notes
+  });
+
+  return newAssignment;
+}
+
+// Request deadline extension
+requestExtension(assignmentId: string, newDueDate: string, reason: string): boolean {
+  const assignment = this.mockAssignments.find(a => a.id === assignmentId);
+
+  if (!assignment) {
+    return false;
+  }
+
+  assignment.extensionRequested = true;
+  assignment.extensionRequestedDate = new Date();
+  assignment.newDueDate = new Date(newDueDate);
+  assignment.updatedAt = new Date();
+
+  console.log('Extension requested:', {
+    assignmentId,
+    newDueDate,
+    reason
+  });
+
+  return true;
+}
+
+// Report no progress on assignment
+reportNoProgress(assignmentId: string, reason: string): boolean {
+  const assignment = this.mockAssignments.find(a => a.id === assignmentId);
+
+  if (!assignment) {
+    return false;
+  }
+
+  assignment.status = AssignmentStatus.NoProgress;
+  assignment.noProgressReason = reason;
+  assignment.updatedAt = new Date();
+
+  console.log('No progress reported:', {
+    assignmentId,
+    reason
+  });
+
+  return true;
+}
 }

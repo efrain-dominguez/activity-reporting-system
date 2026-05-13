@@ -227,4 +227,9 @@ export class ActivitiesService {
       (!act.review || act.review.status === ReviewStatus.Pending)
     ).length;
   }
+
+  addActivity(activity: Activity): void {
+    this.mockActivities.push(activity);
+    console.log('Activity added:', activity);
+  }
 }
